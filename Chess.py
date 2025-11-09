@@ -99,3 +99,59 @@ def get_piece_moves(row, col):
                     target = board[nr][nc]
                     if not target or target[0] != color:
                         moves.append((nr, nc))
+    elif p_type == 'r':  
+        directions = [(-1,0),(1,0),(0,-1),(0,1)]
+    elif p_type == 'b':  
+        directions = [(-1,-1),(-1,1),(1,-1),(1,1)]
+    elif p_type == 'q':  
+        directions = [(-1,0),(1,0),(0,-1),(0,1),(-1,-1),(-1,1),(1,-1),(1,1)]
+    elif p_type == 'k':  
+        for dr in [-1,0,1]:
+            for dc in [-1,0,1]:
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = row + dr, col + dc
+                if is_in_bounds(nr, nc):
+                    target = board[nr][nc]
+                    if not target or target[0] != color:
+                        moves.append((nr, nc))
+    elif p_type == 'n':  
+        for dr, dc in [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]:
+            nr, nc = row + dr, col + dc
+            if is_in_bounds(nr, nc):
+                target = board[nr][nc]
+                if not target or target[0] != color:
+                    moves.append((nr, nc))
+    if p_type in ['r','b','q']:
+        for dr, dc in directions:
+            nr, nc = row + dr, col + dc
+            while is_in_bounds(nr, nc):
+                target = board[nr][nc]
+                if not target:
+                    moves.append((nr, nc))
+                else:
+                    if target[0] != color:
+                        moves.append((nr, nc))
+                    break
+                nr += dr
+                nc += dc
+    return moves
+
+def is_check(color):
+    king_pos = None
+    for r in range(8):
+        for c in range(8):
+            if board[r][c] == color + 'k':
+                king_pos = (r, c)
+                break
+        if king_pos:
+            break
+    opponent_color = 'b' if color == 'w' else 'w'
+    for r in range(8):
+        for c in range(8):
+            piece = board[r][c]
+            if piece and piece[0] == opponent_color:
+                moves = get_piece_moves(r, c)
+                if king_pos in moves:
+                    return True
+    return False
