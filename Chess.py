@@ -150,3 +150,35 @@ def show_promotion_menu(row, col, color):
         pygame.display.flip()
     
     return color + 'q'
+
+def handle_logo():
+    global logo_x, logo_y, logo_x_speed, logo_y_speed, logo_frame_index
+    logo_frame_index = (logo_frame_index + 1) % len(logo_frames)
+    logo = logo_frames[logo_frame_index]
+    screen.blit(logo, (logo_x, logo_y))
+
+    logo_x += logo_x_speed
+    logo_y += logo_y_speed
+
+    if logo_x <= 0 or logo_x >= WIDTH - 200:
+        logo_x_speed = -logo_x_speed
+    if logo_y <= 0 or logo_y >= HEIGHT - 40:
+        logo_y_speed = -logo_y_speed
+
+def get_square(pos):
+    x, y = pos
+    return y // SQUARE_SIZE, x // SQUARE_SIZE
+
+def is_in_bounds(row, col):
+    return 0 <= row < 8 and 0 <= col < 8
+
+def is_square_attacked(row, col, color):
+    opponent_color = 'b' if color == 'w' else 'w'
+    for r in range(8):
+        for c in range(8):
+            piece = board[r][c]
+            if piece and piece[0] == opponent_color:
+                moves = get_piece_moves(r, c, check_check=False)
+                if (row, col) in moves:
+                    return True
+    return False
