@@ -182,3 +182,142 @@ def is_square_attacked(row, col, color):
                 if (row, col) in moves:
                     return True
     return False
+
+def get_piece_moves(row, col, check_check=True):
+    piece = board[row][col]
+    if not piece:
+        return []
+    color = piece[0]
+    p_type = piece[1]
+    moves = []
+
+    if p_type == 'p':
+        dir = -1 if color == 'w' else 1
+        start_row = 6 if color == 'w' else 1
+        if is_in_bounds(row + dir, col) and not board[row + dir][col]:
+            moves.append((row + dir, col))
+            if row == start_row and not board[row + 2 * dir][col]:
+                moves.append((row + 2 * dir, col))
+        for dc in [-1, 1]:
+            nr, nc = row + dir, col + dc
+            if is_in_bounds(nr, nc):
+                target = board[nr][nc]
+                if target and target[0] != color:
+                    moves.append((nr, nc))
+    
+    elif p_type == 'n':
+        for dr, dc in [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]:
+            nr, nc = row + dr, col + dc
+            if is_in_bounds(nr, nc):
+                target = board[nr][nc]
+                if not target or target[0] != color:
+                    moves.append((nr, nc))
+    
+    elif p_type == 'k':
+        for dr in [-1,0,1]:
+            for dc in [-1,0,1]:
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = row + dr, col + dc
+                if is_in_bounds(nr, nc):
+                    target = board[nr][nc]
+                    if not target or target[0] != color:
+                        moves.append((nr, nc))
+        
+        # Рокировка
+        if not king_moved[color]:
+            # Короткая рокировка (направо)
+            if not rook_moved[color]['right']:
+                if color == 'w':
+                    if (board[7][5] is None and board[7][6] is None and 
+                        board[7][7] == 'wr'):
+                        if (not is_square_attacked(7, 4, color) and 
+                            not is_square_attacked(7, 5, color) and 
+                            not is_square_attacked(7, 6, color)):
+                            moves.append((7, 6))
+                else:
+                    if (board[0][5] is None and board[0][6] is None and 
+                        board[0][7] == 'br'):
+                        if (not is_square_attacked(0, 4, color) and 
+                            not is_square_attacked(0, 5, color) and 
+                            not is_square_attacked(0, 6, color)):
+                            moves.append((0, 6))
+            
+            # Длинная рокировка (налево)
+            if not rook_moved[color]['left']:
+                if color == 'w':
+                    if (board[7][1] is None and board[7][2] is None and 
+                        board[7][3] is None and board[7][0] == 'wr'):
+                        if (not is_square_attacked(7, 4, color) and 
+                            not is_square_attacked(7, 3, color) and 
+                            not is_square_attacked(7, 2, color)):
+                            moves.append((7, 2))
+                else:
+                    if (board[0][1] is None and board[0][2] is None and 
+                        board[0][3] is None and board[0][0] == 'br'):
+                        if (not is_square_attacked(0, 4, color) and 
+                            not is_square_attacked(0, 3, color) and 
+                            not is_square_attacked(0, 2, color)):
+                            moves.append((0, 2))
+    
+    elif p_type in ['r', 'b', 'q']:
+        if p_type == 'r':
+            directions = [(-1,0),(1,0),(0,-1),(0,1)]
+        elif p_type == 'b':
+            directions = [(-1,-1),(-1,1),(1,-1),(1,1)]
+        else:  # q
+            directions = [(-1,0),(1,0),(0,-1),(0,1),(-1,-1),(-1,1),(1,-1),(1,1)]
+        
+        for dr, dc in directions:
+            nr, nc = row + dr, col + dc
+            while is_in_bounds(nr, nc):
+                target = board[nr][nc]
+                if not target:
+                    moves.append((nr, nc))
+                else:
+                    if target[0] != color:
+                        moves.append((nr, nc))
+                    break
+                nr += dr
+                nc += dc
+    
+    if check_check:
+        valid_moves = []
+        for move in moves:
+            r2, c2 = move
+            captured = board[r2][c2]
+            board[r2][c2] = board[row][col]
+            board[row][col] = None
+            
+            if not is_check(color):
+                valid_moves.append(move)
+            
+            board[row][col] = board[r2][c2]
+            board[r2][c2] = captured
+        
+        return valid_moves
+    
+    return moves
+
+def is_check(color):
+    king_pos = None
+    for r in range(8):
+        for c in range(8):
+            if board[r][c] == color + 'k':
+                king_pos = (r, c)
+                break
+        if king_pos:
+            break
+    
+    if not king_pos:
+        return False
+    
+    opponent_color = 'b' if color == 'w' else 'w'
+    for r in range(8):
+        for c in range(8):
+            piece = board[r][c]
+            if piece and piece[0] == opponent_color:
+                moves = get_piece_moves(r, c, check_check=False)
+                if king_pos in moves:
+                    return True
+    return False
