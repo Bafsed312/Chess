@@ -367,3 +367,59 @@ def move_piece(r1, c1, r2, c2):
             pawn_promotion_pending = (r2, c2, board[r2][c2][0])
     
     return captured
+
+def promote_pawn(row, col, color):
+    new_piece = show_promotion_menu(row, col, color)
+    board[row][col] = new_piece
+
+def main():
+    global selected_piece, possible_moves, player_turn, pawn_promotion_pending
+    clock = pygame.time.Clock()
+
+    while True:
+        draw_board()
+        
+        if pawn_promotion_pending:
+            row, col, color = pawn_promotion_pending
+            promote_pawn(row, col, color)
+            pawn_promotion_pending = None
+            player_turn = 'b' if player_turn == 'w' else 'w'
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                row, col = get_square(pygame.mouse.get_pos())
+                piece = board[row][col]
+                
+                if selected_piece:
+                    if (row, col) in possible_moves:
+                        r1, c1 = selected_piece
+                        captured = move_piece(r1, c1, row, col)
+                        
+                        if not is_check(player_turn):
+                            player_turn = 'b' if player_turn == 'w' else 'w'
+                        else:
+                            move_piece(row, col, r1, c1)
+                            board[row][col] = captured
+                        
+                        selected_piece = None
+                        possible_moves = []
+                    elif piece and piece[0] == player_turn:
+                        selected_piece = (row, col)
+                        possible_moves = get_piece_moves(row, col)
+                    else:
+                        selected_piece = None
+                        possible_moves = []
+                else:
+                    if piece and piece[0] == player_turn:
+                        selected_piece = (row, col)
+                        possible_moves = get_piece_moves(row, col)
+        
+        handle_logo()
+        pygame.display.flip()
+        clock.tick(60)
+
+if __name__ == "__main__":
+    main()
