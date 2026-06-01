@@ -321,3 +321,49 @@ def is_check(color):
                 if king_pos in moves:
                     return True
     return False
+
+def move_piece(r1, c1, r2, c2):
+    global king_moved, rook_moved, pawn_promotion_pending
+    piece = board[r1][c1]
+    if not piece:
+        return None
+    
+    piece_type = piece[1]
+    piece_color = piece[0]
+    
+    # Обработка рокировки (перемещение ладьи)
+    if piece_type == 'k':
+        king_moved[piece_color] = True
+        # Короткая рокировка
+        if c2 == c1 + 2:
+            if piece_color == 'w':
+                board[7][7] = None
+                board[7][5] = 'wr'
+            else:
+                board[0][7] = None
+                board[0][5] = 'br'
+        # Длинная рокировка
+        elif c2 == c1 - 2:
+            if piece_color == 'w':
+                board[7][0] = None
+                board[7][3] = 'wr'
+            else:
+                board[0][0] = None
+                board[0][3] = 'br'
+    
+    if piece_type == 'r':
+        if c1 == 0:
+            rook_moved[piece_color]['left'] = True
+        elif c1 == 7:
+            rook_moved[piece_color]['right'] = True
+    
+    captured = board[r2][c2]
+    board[r2][c2] = board[r1][c1]
+    board[r1][c1] = None
+    
+    # Превращение пешки
+    if board[r2][c2][1] == 'p':
+        if (board[r2][c2][0] == 'w' and r2 == 0) or (board[r2][c2][0] == 'b' and r2 == 7):
+            pawn_promotion_pending = (r2, c2, board[r2][c2][0])
+    
+    return captured
