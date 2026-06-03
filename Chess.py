@@ -225,7 +225,7 @@ def get_piece_moves(row, col, check_check=True):
                         moves.append((nr, nc))
         
         # Рокировка
-                if check_check: 
+        if check_check: 
             if not king_moved[color]:
                 if not rook_moved[color]['right']:
                     if color == 'w':
