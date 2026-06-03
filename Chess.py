@@ -225,40 +225,39 @@ def get_piece_moves(row, col, check_check=True):
                         moves.append((nr, nc))
         
         # Рокировка
-        if not king_moved[color]:
-            # Короткая рокировка (направо)
-            if not rook_moved[color]['right']:
-                if color == 'w':
-                    if (board[7][5] is None and board[7][6] is None and 
-                        board[7][7] == 'wr'):
-                        if (not is_square_attacked(7, 4, color) and 
-                            not is_square_attacked(7, 5, color) and 
-                            not is_square_attacked(7, 6, color)):
-                            moves.append((7, 6))
-                else:
-                    if (board[0][5] is None and board[0][6] is None and 
-                        board[0][7] == 'br'):
-                        if (not is_square_attacked(0, 4, color) and 
-                            not is_square_attacked(0, 5, color) and 
-                            not is_square_attacked(0, 6, color)):
-                            moves.append((0, 6))
-            
-            # Длинная рокировка (налево)
-            if not rook_moved[color]['left']:
-                if color == 'w':
-                    if (board[7][1] is None and board[7][2] is None and 
-                        board[7][3] is None and board[7][0] == 'wr'):
-                        if (not is_square_attacked(7, 4, color) and 
-                            not is_square_attacked(7, 3, color) and 
-                            not is_square_attacked(7, 2, color)):
-                            moves.append((7, 2))
-                else:
-                    if (board[0][1] is None and board[0][2] is None and 
-                        board[0][3] is None and board[0][0] == 'br'):
-                        if (not is_square_attacked(0, 4, color) and 
-                            not is_square_attacked(0, 3, color) and 
-                            not is_square_attacked(0, 2, color)):
-                            moves.append((0, 2))
+                if check_check: 
+            if not king_moved[color]:
+                if not rook_moved[color]['right']:
+                    if color == 'w':
+                        if (board[7][5] is None and board[7][6] is None and 
+                            board[7][7] == 'wr'):
+                            if (not is_square_attacked(7, 4, color) and 
+                                not is_square_attacked(7, 5, color) and 
+                                not is_square_attacked(7, 6, color)):
+                                moves.append((7, 6))
+                    else:
+                        if (board[0][5] is None and board[0][6] is None and 
+                            board[0][7] == 'br'):
+                            if (not is_square_attacked(0, 4, color) and 
+                                not is_square_attacked(0, 5, color) and 
+                                not is_square_attacked(0, 6, color)):
+                                moves.append((0, 6))
+                
+                if not rook_moved[color]['left']:
+                    if color == 'w':
+                        if (board[7][1] is None and board[7][2] is None and 
+                            board[7][3] is None and board[7][0] == 'wr'):
+                            if (not is_square_attacked(7, 4, color) and 
+                                not is_square_attacked(7, 3, color) and 
+                                not is_square_attacked(7, 2, color)):
+                                moves.append((7, 2))
+                    else:
+                        if (board[0][1] is None and board[0][2] is None and 
+                            board[0][3] is None and board[0][0] == 'br'):
+                            if (not is_square_attacked(0, 4, color) and 
+                                not is_square_attacked(0, 3, color) and 
+                                not is_square_attacked(0, 2, color)):
+                                moves.append((0, 2))
     
     elif p_type in ['r', 'b', 'q']:
         if p_type == 'r':
